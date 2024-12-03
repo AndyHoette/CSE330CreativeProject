@@ -36,6 +36,10 @@ const darkModeButton = document.getElementById('darkModeButton');
 const leaderBoardButton = document.getElementById('leaderBoardButton');
 const leaderBoardPage = document.getElementById('leaderBoardPage');
 const backButtonLeaderBoard = document.getElementById('backButtonLeaderBoard');
+const newUsernameInput = document.getElementById('newUsernameInput');
+const newPasswordInput = document.getElementById('newPasswordInput');
+const createAccountButton = document.getElementById('createAccountButton');
+const listOfPlayers = document.getElementById('listOfPlayers');
 //This is my punishment for not learning jQuery
 const debug = true; //nice bool that lets me turn on and off prints easily
 
@@ -77,6 +81,12 @@ function logIn(usernameAttempt, passwordAttempt) {
     if(logInValidation(usernameAttempt, passwordAttempt)){
         sessionStorage.setItem('username', 'User123'); //sets a session var to control variable
         showDiv(mainPageDiv);
+    }
+}
+
+function createAccount(newUsername, newPassword){
+    if(debug){
+        console.log("creating account: " + newUsername + ", " + newPassword);
     }
 }
 
@@ -146,7 +156,7 @@ function getRandomInt(max){
 
 function generateRandomUsername(){
     //returns a users name that follows the format {adj} + {animal} + {0-99}
-    usernameInput.value = adjectives[getRandomInt(10)] + animals[getRandomInt(10)] + getRandomInt(100);
+    newUsernameInput.value = adjectives[getRandomInt(10)] + animals[getRandomInt(10)] + getRandomInt(100);
 }
 
 function rouletteStraightBet(guess, betSize){
@@ -214,6 +224,18 @@ function darkMode(){
     document.body.style.backgroundColor = "dimGray";
 }
 
+function updateLeaderBoard(arrOfPlayers){
+    if(debug){
+        console.log("updateLeaderBoard: " + arrOfPlayers[0].username);
+    }
+    for(let i = 0; i < arrOfPlayers.length; i++){
+        const newListItem = document.createElement('li');
+        newListItem.innerHTML = arrOfPlayers[i].username + ": $" + arrOfPlayers[i].balance;
+        listOfPlayers.appendChild(newListItem);
+    }
+}
+
+createAccountButton.addEventListener('click', () => createAccount(newUsernameInput.value, newPasswordInput.value));
 backButtonLeaderBoard.addEventListener("click", () => {showDiv(mainPageDiv)});
 leaderBoardButton.addEventListener("click", () => {showDiv(leaderBoardPage)});
 darkModeButton.addEventListener('click', () => darkMode());

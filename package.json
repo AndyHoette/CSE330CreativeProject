@@ -1,0 +1,26 @@
+{
+  "name": "cse330creativeproject",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AndyHoette/CSE330CreativeProject.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AndyHoette/CSE330CreativeProject/issues"
+  },
+  "homepage": "https://github.com/AndyHoette/CSE330CreativeProject#readme",
+  "dependencies": {
+    "ejs": "^3.1.10",
+    "express": "^4.21.1",
+    "mongoose": "^8.8.3",
+    "socket.io": "^4.8.1"
+  }
+}
