@@ -6,34 +6,52 @@
 </head>
 <body>
 <div id="logInPage">
-    <label for="UsernameInput">Username:</label>
-    <input id="UsernameInput" type="text">
+    <label for="usernameInput">Username:</label>
+    <input id="usernameInput" type="text">
     <br>
-    <label for="PasswordInput">Password:</label>
-    <input id="PasswordInput" type="password">
+    <label for="passwordInput">Password:</label>
+    <input id="passwordInput" type="password">
+    <button id="darkModeButton">Dark Mode</button>
     <br>
     <button id="logInButton">Submit</button>
+    <br><br><br>
+    <label for="newUsernameInput">Username:</label>
+    <input id="newUsernameInput" type="text">
+    <button id="randomUsernameButton">Generate A Random Username</button>
+    <br>
+    <label for="newPasswordInput">Password:</label>
+    <input id="newPasswordInput" type="password">
+    <br>
+    <button id="createAccountButton">Submit</button>
 </div>
 <div id="mainPage" style="display: none">
-    <h2>Current Balance: $<%= balance %></h2>
-    <button id="blackJackButton">Play Black Jack</button>
+    <h2 class="balance">Current Balance: $<%= balance %></h2>
+    <button id="blackJackButton" style="display: none">Play Black Jack</button>
     <br>
     <button id="rouletteButton">Play Roulette</button>
     <br>
     <button id="crapsButton">Play Craps</button>
     <br>
+    <br>
+    <button id="dailyRewardButton">Request Daily Reward</button>
+    <br>
+    <button id="leaderBoardButton">View Leader Board</button>
+    <br>
+    <a href="https://en.wikipedia.org/wiki/Blackjack">How to Play Black Jack, </a>
+    <a href="https://en.wikipedia.org/wiki/Baccarat">Baccarat, </a>
+    <a href="https://en.wikipedia.org/wiki/Roulette">Roulette</a>
 </div>
 <div id="blackJackPage" style="display: none">
     <h2>Black Jack</h2>
     <button id="backButtonBlackJack">Back</button>
-    <h3>Current Balance: $<%= balance %></h3>
+    <h3 class="balance">Current Balance: $<%= balance %></h3>
     <label for="BlackJackInput">Bet Size:</label>
     <input id="BlackJackInput" type="number">
     <button id="playBlackJackButton">Play</button>
     <hr>
     <div id="blackJackGame" style="display: none">
-        <h3>Dealer's Cards: A♠</h3>
-        <h3>Your Cards: 2♥ 4♦</h3>
+        <h3 id="dealersHandBlackJack">Dealer's Cards: A♠</h3>
+        <h3 id="playersHandBlackJack">Your Cards: 2♥ 4♦</h3>
         <button id="blackJackHit">Hit</button>
         <button id="blackJackStand">Stand</button>
     </div>
@@ -41,23 +59,23 @@
 <div id="roulettePage" style="display: none">
     <h2>Roulette</h2>
     <button id="backButtonRoulette">Back</button>
-    <h3>Current Balance: $<%= balance %></h3>
-    <label for="RouletteInput">Bet Size:</label>
-    <input id="RouletteInput" type="number">
+    <h3 class="balance">Current Balance: $<%= balance %></h3>
+    <label for="rouletteInput">Bet Size:</label>
+    <input id="rouletteInput" type="number">
     <br>
     <label for="StraightUpBet">Straight Up Bet Number:</label>
     <input id="StraightUpBet" type="number">
     <button id="StraightUpButton">Bet</button>
     <br>
-    <input type="radio" id="redBet" value="redBet">
+    <input type="radio" id="redBet" value="redBet" name="color">
     <label for="redBet">Red</label>
-    <input type="radio" id="blackBet" value="blackBet">
+    <input type="radio" id="blackBet" value="blackBet" name="color">
     <label for="blackBet">Black</label>
     <button id="colorBetButton">Bet</button>
     <br>
-    <input type="radio" id="oddBet" value="oddBet">
+    <input type="radio" id="oddBet" value="oddBet" name="parity">
     <label for="oddBet">Odd</label>
-    <input type="radio" id="evenBet" value="evenBet">
+    <input type="radio" id="evenBet" value="evenBet" name="parity">
     <label for="evenBet">Even</label>
     <button id="EvenOddBetButton">Bet</button>
     <hr>
@@ -66,17 +84,21 @@
 <div id="crapsPage" style="display: none">
     <h2>Craps</h2>
     <button id="backButtonCraps">Back</button>
-    <h3>Current Balance: $<%= balance %></h3>
-    <label for="CrapsInput">Bet Size:</label>
-    <input id="CrapsInput" type="number">
-    <button id="SelfBetButton">Bet On Yourself</button>
-    <button id="TieBetButton">Bet On Draw</button>
+    <h3 class="balance">Current Balance: $<%= balance %></h3>
+    <label for="crapsInput">Bet Size:</label>
+    <input id="crapsInput" type="number">
+    <button id="selfBetButton">Bet On Yourself</button>
+    <button id="tieBetButton">Bet On Draw</button>
     <hr>
-    <div id="CrapsGame" style="display: none">
-        <h2>Dealer's Hand: 8♦ A♠</h2>
-        <h2>Your Hand: 2♣ 3♣</h2>
+    <div id="crapsGame" style="display: none">
+        <h2 id="dealersHandCraps">Dealer's Hand: 8♦ A♠</h2>
+        <h2 id="playersHandCraps">Your Hand: 2♣ 3♣</h2>
         <h2>Result: Dealer Win</h2>
     </div>
+</div>
+<div id="leaderBoardPage" style="display: none">
+    <button id="backButtonLeaderBoard">Back</button>
+    <h2>Leader Board</h2>
 </div>
 <script src="index.js"></script>
 </body>

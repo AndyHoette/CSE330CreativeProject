@@ -17,7 +17,10 @@ const userSchema = new mongoose.Schema({
         unique: true,
     },
     password: String,
-    balance: Number,
+    balance: {
+        type: Number,
+        default: 10000
+    },
     lastDayOfReward: {
         type: Number,
         default: () => Math.floor(Date.now() / 86400000)
@@ -50,13 +53,22 @@ app.get('/', function (req, res) {
 
 
 async function createNewUser(newUsername, newPassword){
-    const newUser = await userModel.create({
+    const newUser = new users({
         username: newUsername,
         password: newPassword,
-        balance : 10000,
     })
+    await newUser.save();
 }
 
+async function getLeaderBoard(){
+    const orderedListOfUsers = await users.find().sort({balance: -1}).select('username balance -_id').lean();
+    console.log(orderedListOfUsers);
+}
+
+getLeaderBoard();
+function newDay(daySinceEpoch){
+    return daySinceEpoch !== Math.floor(Date.now() / 86400000);
+}
 
 function getColor(str){
     const arr = str.split('');
@@ -195,7 +207,7 @@ function playBlackJack(betSize){
     if(isAce(currCard)){
         dealerHasAce = true;
     }
-    dealerTotal = cardValueBlackJack(currCard);
+    dealerTotal += cardValueBlackJack(currCard);
     //await response
     //TODO: continue hitting for as long as the player wants
     while(maxValueBlackjack(dealerTotal, dealerHasAce) < 17 || (dealerTotal === 7 && dealerHasAce)){
