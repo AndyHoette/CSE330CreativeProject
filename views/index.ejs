@@ -28,17 +28,18 @@
 <div id="mainPage" style="display: none">
     <h2 class="balance">Current Balance: $<%= balance %></h2>
     <button id="blackJackButton" style="display: none">Play Black Jack</button>
+    <button id="crapsButton">Play Craps</button>
     <br>
     <button id="rouletteButton">Play Roulette</button>
     <br>
-    <button id="crapsButton">Play Craps</button>
+    <button id="baccaratButton">Play Baccarat</button>
     <br>
     <br>
     <button id="dailyRewardButton">Request Daily Reward</button>
     <br>
     <button id="leaderBoardButton">View Leader Board</button>
     <br>
-    <a href="https://en.wikipedia.org/wiki/Blackjack">How to Play Black Jack, </a>
+    <a href="https://en.wikipedia.org/wiki/Craps">How to Play Craps, </a>
     <a href="https://en.wikipedia.org/wiki/Baccarat">Baccarat, </a>
     <a href="https://en.wikipedia.org/wiki/Roulette">Roulette</a>
 </div>
@@ -55,6 +56,18 @@
         <h3 id="playersHandBlackJack">Your Cards: 2♥ 4♦</h3>
         <button id="blackJackHit">Hit</button>
         <button id="blackJackStand">Stand</button>
+    </div>
+</div>
+<div id="crapsPage" style="display: none">
+    <h2>Craps</h2>
+    <button id="backButtonCraps">Back</button>
+    <h3 class="balance">Balance: $<%= balance %></h3>
+    <label for="crapsInput">Bet: Size</label>
+    <input id="crapsInput" type="number">
+    <button id="crapsPlayButton">Play</button>
+    <hr>
+    <div id="crapsGame" style="display: none">
+        <h3 id="crapsRolls"></h3>
     </div>
 </div>
 <div id="roulettePage" style="display: none">
@@ -80,20 +93,20 @@
     <label for="evenBet">Even</label>
     <button id="EvenOddBetButton">Bet</button>
     <hr>
-    <h3 style="display: none">It was a Red 27!</h3>
+    <h3 id="rouletteResult"></h3>
 </div>
-<div id="crapsPage" style="display: none">
-    <h2>Craps</h2>
-    <button id="backButtonCraps">Back</button>
+<div id="baccaratPage" style="display: none">
+    <h2>Baccarat</h2>
+    <button id="backButtonBaccarat">Back</button>
     <h3 class="balance">Current Balance: $<%= balance %></h3>
-    <label for="crapsInput">Bet Size:</label>
-    <input id="crapsInput" type="number">
+    <label for="baccaratInput">Bet Size:</label>
+    <input id="baccaratInput" type="number">
     <button id="selfBetButton">Bet On Yourself</button>
     <button id="tieBetButton">Bet On Draw</button>
     <hr>
-    <div id="crapsGame" style="display: none">
-        <h2 id="dealersHandCraps">Dealer's Hand: 8♦ A♠</h2>
-        <h2 id="playersHandCraps">Your Hand: 2♣ 3♣</h2>
+    <div id="baccaratGame" style="display: none">
+        <h2 id="dealersHandBaccarat">Dealer's Hand: 8♦ A♠</h2>
+        <h2 id="playersHandBaccarat">Your Hand: 2♣ 3♣</h2>
         <h2>Result: Dealer Win</h2>
     </div>
 </div>

@@ -1,20 +1,24 @@
+let socketio = io.connect();
+socketio.on("messageToClient", function(data){
+    console.log(data);
+})
 const logInDiv = document.getElementById('logInPage');
 const mainPageDiv = document.getElementById('mainPage');
 const blackJackDiv = document.getElementById('blackJackPage')
 const rouletteDiv = document.getElementById('roulettePage')
-const crapsDiv = document.getElementById('crapsPage')
+const baccaratDiv = document.getElementById('baccaratPage')
 const logInButton = document.getElementById('logInButton')
 const blackJackButton = document.getElementById('blackJackButton')
 const rouletteButton = document.getElementById('rouletteButton')
-const crapsButton = document.getElementById('crapsButton')
+const baccaratButton = document.getElementById('baccaratButton')
 const backButtonBlackJack = document.getElementById('backButtonBlackJack')
 const backButtonRoulette = document.getElementById('backButtonRoulette')
-const backCrapsButton = document.getElementById('backButtonCraps')
+const backBaccaratButton = document.getElementById('backButtonBaccarat')
 const listOfDivs = document.querySelectorAll('div');
 const dealersHandBlackJack = document.getElementById('dealersHandBlackJack')
 const playersHandBlackJack = document.getElementById('playersHandBlackJack')
-const dealersHandCraps = document.getElementById('dealersHandCraps')
-const playersHandCraps = document.getElementById('playersHandCraps')
+const dealersHandBaccarat = document.getElementById('dealersHandBaccarat')
+const playersHandBaccarat = document.getElementById('playersHandBaccarat')
 const usernameInput = document.getElementById('usernameInput');
 const passwordInput = document.getElementById('passwordInput');
 const balanceLabels = document.getElementsByClassName("balance");
@@ -28,9 +32,9 @@ const rouletteBlackButton = document.getElementById('blackBet');
 const rouletteEvenOddButton = document.getElementById('EvenOddBetButton');
 const rouletteOddButton = document.getElementById('oddBet');
 const rouletteEvenButton = document.getElementById('evenBet');
-const crapsInput = document.getElementById('crapsInput');
-const crapsSelfBetButton = document.getElementById('selfBetButton');
-const crapsTieBetButton = document.getElementById('tieBetButton');
+const baccaratInput = document.getElementById('baccaratInput');
+const baccaratSelfBetButton = document.getElementById('selfBetButton');
+const baccaratTieBetButton = document.getElementById('tieBetButton');
 const dailyRewardButton = document.getElementById('dailyRewardButton');
 const darkModeButton = document.getElementById('darkModeButton');
 const leaderBoardButton = document.getElementById('leaderBoardButton');
@@ -40,6 +44,13 @@ const newUsernameInput = document.getElementById('newUsernameInput');
 const newPasswordInput = document.getElementById('newPasswordInput');
 const createAccountButton = document.getElementById('createAccountButton');
 const listOfPlayers = document.getElementById('listOfPlayers');
+const crapsDiv = document.getElementById('crapsPage');
+const crapsButton = document.getElementById('crapsButton');
+const crapsInput = document.getElementById('crapsInput');
+const crapsPlayButton = document.getElementById('crapsPlayButton');
+const crapsRolls = document.getElementById('crapsRolls');
+const backButtonCraps = document.getElementById('backButtonCraps');
+const rouletteResult = document.getElementById('rouletteResult');
 //This is my punishment for not learning jQuery
 const debug = true; //nice bool that lets me turn on and off prints easily
 
@@ -49,13 +60,13 @@ function clearBlackJack(){ //clears the prev games
     dealersHandBlackJack.innerHTML = "Dealer's Cards: "
     playersHandBlackJack.innerHTML = "Player's Cards: "
 }
-function clearCraps(){
-    dealersHandCraps.innerHTML = "Dealer's Cards: "
-    playersHandCraps.innerHTML = "Player's Cards: "
+function clearBaccarat(){
+    dealersHandBaccarat.innerHTML = "Dealer's Cards: "
+    playersHandBaccarat.innerHTML = "Player's Cards: "
 }
 function showDiv(divToShow) { //this controls what "page" is showing
     clearBlackJack()
-    clearCraps()
+    clearBaccarat()
     if(!checkLogIn()){
         divToShow = logInDiv;
     }
@@ -70,24 +81,18 @@ function showDiv(divToShow) { //this controls what "page" is showing
         }
     )
 }
-function logInValidation(usernameAttempt, passwordAttempt){ //you know how it is
-    //TODO: request server
-    return true;
-}
 function checkLogIn(){ //makes sure the user if logged in
     return sessionStorage.getItem("username") != null
 }
 function logIn(usernameAttempt, passwordAttempt) {
-    if(logInValidation(usernameAttempt, passwordAttempt)){
-        sessionStorage.setItem('username', 'User123'); //sets a session var to control variable
-        showDiv(mainPageDiv);
-    }
+    socketio.emit("login", {"username": usernameAttempt, "password": passwordAttempt});
 }
 
 function createAccount(newUsername, newPassword){
     if(debug){
         console.log("creating account: " + newUsername + ", " + newPassword);
     }
+    socketio.emit("createAccount", {"username": newUsername, "newPassword": newPassword});
 }
 
 function numToString(num){ //this converts a number to a card
@@ -125,14 +130,18 @@ function numToString(num){ //this converts a number to a card
 function addDealerCardBlackJack(num){
     dealersHandBlackJack.innerHTML += numToString(num);
 }
-function addDealerCardCraps(num){
-    dealersHandCraps.innerHTML += numToString(num);
+function addDealerCardBaccarat(num){
+    dealersHandBaccarat.innerHTML += numToString(num);
 }
 function addPlayerCardBlackJack(num){
     playersHandBlackJack.innerHTML += numToString(num);
 }
-function addPlayerCardCraps(num){
-    playersHandCraps.innerHTML += numToString(num);
+function addPlayerCardBaccarat(num){
+    playersHandBaccarat.innerHTML += numToString(num);
+}
+
+function addCrapsRoll(num){
+    crapsRolls.innerHTML += num;
 }
 
 function updateBalance(newBalance){ //this will update all the balances on client side
@@ -146,6 +155,13 @@ function addBalance(delta){ //this is used to change the balance
     updateBalance(balance + delta);
 }
 
+function getBalance(){
+    if(!checkLogIn()){
+        updateBalance(0);
+        return;
+    }
+    socketio.emit("requestBalance", {"username": sessionStorage.getItem("username")})
+}
 
 let animals = ["Lion", "Tiger", "Elephant", "Giraffe", "Zebra", "Kangaroo", "Panda", "Dolphin", "Wolf", "Leopard"];
 let adjectives = ["happy", "sad", "bright", "dark", "fast", "slow", "strong", "weak", "big", "small"]
@@ -166,8 +182,8 @@ function rouletteStraightBet(guess, betSize){
     if(betSize == ''|| !checkLogIn()){
         return;
     }
-    //TODO: send number to server with betSize
     addBalance(-1 * betSize);
+    socketio.emit("rouletteStraightBet", {"username": sessionStorage.getItem("username"), "betSize": betSize, "numGuess": guess});
 }
 
 function rouletteColorBet(redBool, blackBool, betSize){
@@ -178,6 +194,7 @@ function rouletteColorBet(redBool, blackBool, betSize){
         return;
     }
     addBalance(-1 * betSize);
+    socketio.emit("rouletteColorBet", {"username": sessionStorage.getItem("username"), "betSize": betSize, "redBool": redBool, "blackBool": blackBool});
 }
 
 function rouletteEvenOddBet(oddBool, evenBool, betSize){
@@ -188,9 +205,10 @@ function rouletteEvenOddBet(oddBool, evenBool, betSize){
         return;
     }
     addBalance(-1 * betSize);
+    socketio.emit("rouletteEvenOddBet", {"username": sessionStorage.getItem("username"), "betSize": betSize, "oddBool": oddBool, "evenBool": evenBool});
 }
 
-function crapsWinBet(betSize){
+function baccaratWinBet(betSize){
     if(debug){
         console.log("C Bet self: " + betSize);
     }
@@ -198,9 +216,10 @@ function crapsWinBet(betSize){
         return;
     }
     addBalance(-1 * betSize);
+    socketio.emit("baccaratWinBet", {"username": sessionStorage.getItem("username"), "betSize": betSize})
 }
 
-function crapsTieBet(betSize){
+function baccaratTieBet(betSize){
     if(debug){
         console.log("C Bet Tie: " + betSize);
     }
@@ -208,6 +227,18 @@ function crapsTieBet(betSize){
         return;
     }
     addBalance(-1 * betSize);
+    socketio.emit("baccaratTieBet", {"username": sessionStorage.getItem("username"), "betSize": betSize})
+}
+
+function crapsBet(betSize){
+    if(debug){
+        console.log("Bet craps: " + betSize);
+    }
+    if(betSize == '' || !checkLogIn()){
+        return;
+    }
+    addBalance(-1 * betSize);
+    socketio.emit("crapsBet", {"username": sessionStorage.getItem("username"), "betSize": betSize});
 }
 
 function requestDailyReward(){
@@ -217,7 +248,8 @@ function requestDailyReward(){
     if(!checkLogIn()){
         return;
     }
-    addBalance(1000)
+    //addBalance(1000)
+    socketio.emit("requestDaily", {"username": sessionStorage.getItem("username")});
 }
 
 function darkMode(){
@@ -235,21 +267,66 @@ function updateLeaderBoard(arrOfPlayers){
     }
 }
 
+function requestLeaderBoard(){
+    socketio.emit("updateLeaderBoard", {});
+}
+
+socketio.on("loginResolved", function(data){
+    if(!data["success"]){
+        return;
+    }
+    sessionStorage.setItem("username", data["username"]);
+    showDiv(mainPageDiv);
+});
+
+socketio.on("balanceUpdated", function(data){
+    updateBalance(data["balance"]);
+});
+
+socketio.on("roulletteResolved", function(data){
+    rouletteResult.innerHTML = "It was a " + data["result"];
+});
+
+socketio.on("baccaratUserCard", function(data){
+    addPlayerCardBaccarat(data["card"]);
+});
+
+socketio.on("baccaratDealerCard", function(data){
+    addDealerCardBaccarat(data["card"]);
+});
+
+socketio.on("crapsRoll", function(data){
+    addCrapsRoll(data["roll"]);
+});
+
+socketio.on("leaderBoardResolved", function(data){
+    if(debug){
+        console.log("leaderBoardResolved");
+        console.log(data);
+    }
+    updateLeaderBoard(data);
+})
+
+//socketio.emit("messageToServer", {"message": "hi"});
+
 createAccountButton.addEventListener('click', () => createAccount(newUsernameInput.value, newPasswordInput.value));
 backButtonLeaderBoard.addEventListener("click", () => {showDiv(mainPageDiv)});
 leaderBoardButton.addEventListener("click", () => {showDiv(leaderBoardPage)});
 darkModeButton.addEventListener('click', () => darkMode());
 dailyRewardButton.addEventListener("click", () => requestDailyReward());
-crapsTieBetButton.addEventListener("click", () => crapsTieBet(crapsInput.value));
-crapsSelfBetButton.addEventListener("click", () => crapsWinBet(crapsInput.value));
+baccaratTieBetButton.addEventListener("click", () => baccaratTieBet(baccaratInput.value));
+baccaratSelfBetButton.addEventListener("click", () => baccaratWinBet(baccaratInput.value));
 rouletteEvenOddButton.addEventListener('click', () => rouletteEvenOddBet(rouletteOddButton.checked, rouletteEvenButton.checked, rouletteInput.value));
 rouletteStraightUpBetButton.addEventListener("click", () => rouletteStraightBet(rouletteStraightUpBetInput.value, rouletteInput.value));
 rouletteColorBetButton.addEventListener("click", () => rouletteColorBet(rouletteRedButton.checked, rouletteBlackButton.checked, rouletteInput.value));
-randomUsernameButton.addEventListener('click', () => generateRandomUsername())
+crapsPlayButton.addEventListener('click', () => {crapsBet(crapsInput.value);});
+randomUsernameButton.addEventListener('click', () => generateRandomUsername());
 logInButton.addEventListener('click', () => logIn(usernameInput.value, passwordInput.value));
-backButtonBlackJack.addEventListener('click', () => {showDiv(mainPageDiv);})
-backButtonRoulette.addEventListener('click', () => {showDiv(mainPageDiv);})
-backCrapsButton.addEventListener('click', () => {showDiv(mainPageDiv);})
-blackJackButton.addEventListener('click', () => {showDiv(blackJackDiv);})
-rouletteButton.addEventListener('click', () => {showDiv(rouletteDiv);})
-crapsButton.addEventListener('click', () => {showDiv(crapsDiv);})
+backButtonBlackJack.addEventListener('click', () => {showDiv(mainPageDiv);});
+backButtonRoulette.addEventListener('click', () => {showDiv(mainPageDiv);});
+backBaccaratButton.addEventListener('click', () => {showDiv(mainPageDiv);});
+blackJackButton.addEventListener('click', () => {showDiv(blackJackDiv);});
+rouletteButton.addEventListener('click', () => {showDiv(rouletteDiv);});
+baccaratButton.addEventListener('click', () => {showDiv(baccaratDiv);});
+crapsButton.addEventListener('click', () => {showDiv(crapsDiv);});
+backButtonCraps.addEventListener('click', () => {showDiv(mainPageDiv);});

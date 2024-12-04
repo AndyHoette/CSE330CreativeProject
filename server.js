@@ -1,4 +1,12 @@
 const express = require('express')
+const app = express();
+const server = require("http").createServer(app);
+const io = require("socket.io")(server);
+const port = 3000
+
+//server.listen(port);
+
+app.use(express.static('./public'))
 const mongoose = require('mongoose');
 async function run(){
     try{
@@ -26,16 +34,20 @@ const userSchema = new mongoose.Schema({
         default: () => Math.floor(Date.now() / 86400000)
     },
 })
-const users = mongoose.model('users', userSchema)
-const app = express()
-app.use(express.static('./public'))
-const rouletteWheel = ["0 green", "32 red", "15 black", "19 red", "4 black",
-    "21 red", "2 black", "25 red", "17 black", "34 red", "6 black", "27 red", "13 black", "36 red",
-    "11 black", "30 red", "8 black", "23 red", "10 black", "5 red", "24 black", "16 red", "33 black",
-    "1 red", "20 black", "14 red", "31 black", "9 red", "22 black", "18 red", "29 black", "7 red",
-    "28 black", "12 red", "35 black", "3 red", "26 black"];
+userSchema.methods.checkPassword = function checkPassword(password){
+    return this.password === password;
+}
+userSchema.methods.addBalance = function addBalance(delta){
+    this.balance += delta;
+}
+userSchema.methods.checkDaily = function checkDaily(){
+    return Math.floor(Date.now()/86400000) !== this.lastDayOfReward;
+}
+userSchema.methods.getMyBalance = function getMyBalance(){
+    return this.balance;
+}
+const User = mongoose.model('users', userSchema)
 let cardNumbersTaken = [];
-const port = 3000
 
 
 app.set('view engine', 'ejs');
@@ -44,7 +56,7 @@ app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 
 
-app.listen(port, () => {
+server.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
 })
 app.get('/', function (req, res) {
@@ -52,20 +64,26 @@ app.get('/', function (req, res) {
 });
 
 
-async function createNewUser(newUsername, newPassword){
-    const newUser = new users({
-        username: newUsername,
-        password: newPassword,
-    })
-    await newUser.save();
+async function createNewUser(newUsername, newPassword, socket){
+    try{
+        const newUser = new User({
+            username: newUsername,
+            password: newPassword,
+        })
+        await newUser.save();
+        socket.emit("loginResolved", {"success": true, "username": newUsername});
+    }
+    catch(err){
+        socket.emit("loginResolved", {"success": false});
+    }
 }
 
-async function getLeaderBoard(){
-    const orderedListOfUsers = await users.find().sort({balance: -1}).select('username balance -_id').lean();
-    console.log(orderedListOfUsers);
+async function getLeaderBoard(socket){
+    const orderedListOfUsers = await User.find().sort({balance: -1}).select('username balance -_id').lean();
+    socket.emit("leaderBoardResolved", orderedListOfUsers);
 }
 
-getLeaderBoard();
+//getLeaderBoard();
 function newDay(daySinceEpoch){
     return daySinceEpoch !== Math.floor(Date.now() / 86400000);
 }
@@ -73,6 +91,10 @@ function newDay(daySinceEpoch){
 function getColor(str){
     const arr = str.split('');
     return arr[1];
+}
+function getNumber(str){
+    const arr = str.split('');
+    return arr[0];
 }
 function isEven(str){
     const arr = str.split('');
@@ -228,3 +250,105 @@ function playBlackJack(betSize){
         //TODO: draw
     }
 }
+
+function randomDice(){
+    return getRandomInt(6) + getRandomInt(6)+ 2;
+}
+
+function playCraps(betSize){
+    let roll = randomDice();
+    if(roll === 7 || roll === 11){
+        //TODO: Win
+    }
+    else if(roll === 2 || roll === 3 || roll === 12){
+        //Lose
+    }
+    let roll2 = -1;
+    while(roll2 !== roll && roll2 !== 7){
+        roll2 = randomDice();
+    }
+    if(roll2 === roll){
+        //win
+    }
+    //lose
+}
+const rouletteWheel = ["0 green", "32 red", "15 black", "19 red", "4 black",
+    "21 red", "2 black", "25 red", "17 black", "34 red", "6 black", "27 red", "13 black", "36 red",
+    "11 black", "30 red", "8 black", "23 red", "10 black", "5 red", "24 black", "16 red", "33 black",
+    "1 red", "20 black", "14 red", "31 black", "9 red", "22 black", "18 red", "29 black", "7 red",
+    "28 black", "12 red", "35 black", "3 red", "26 black"];
+function playRoulette(){
+    return rouletteWheel[getRandomInt(rouletteWheel.length)];
+}
+
+function rouletteStraightBet(data, socket){
+    const numberSpun = getNumber(playRoulette());
+    if(numberSpun === data["numGuess"]){
+
+    }
+}
+
+async function checkLogin(data, socket){
+    const existsBool = await User.exists({username : data["username"]});
+    if(!existsBool){
+        socket.emit("loginResolved", {"success": false});
+        return;
+    }
+    const possibleUser = await User.findOne({username : data["username"]});
+    if(possibleUser.checkPassword(data["password"])){
+        socket.emit("loginResolved", {"success": true, "username": data["username"]});
+        return;
+    }
+    socket.emit("loginResolved", {"success": false});
+}
+
+async function getBalance(username, socket){
+    const existsBool = await User.exists({username : username});
+    if(!existsBool){
+        return;
+    }
+    const possibleUser = await User.findOne({username : username});
+    socket.emit("balanceUpdated", {"balance" : possibleUser.getMyBalance()});
+}
+
+async function updateBalance(username, delta){
+    const existsBool = await User.exists({username : username});
+    if(!existsBool){
+        return;
+    }
+    const possibleUser = await User.findOne({username : username});
+    possibleUser.addBalance(delta);
+}
+
+async function getDaily(username){
+    const existsBool = await User.exists({username : username});
+    if(!existsBool){
+        return;
+    }
+    const possibleUser = await User.findOne({username : username});
+    if(possibleUser.checkDaily()){
+        await updateBalance(username, 1000);
+    }
+}
+
+io.sockets.on('connection', function(socket){
+    socket.on("login", function(data){
+        checkLogin(data, socket);
+    });
+    socket.on("createAccount", function(data){
+        createNewUser(data["username"], data["password"], socket);
+    });
+    socket.on("requestBalance", function(data){
+        getBalance(data["username"], socket);
+    })
+    socket.on("requestDaily", function(data){
+        getDaily(data["username"]);
+        getBalance(data["username"], socket);
+    })
+    socket.on("updateLeaderBoard", function(data){
+        getLeaderBoard(socket);
+    })
+    socket.on("rouletteStraightBet", function(data){
+
+    })
+})
