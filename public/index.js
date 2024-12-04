@@ -70,6 +70,9 @@ function showDiv(divToShow) { //this controls what "page" is showing
     if(!checkLogIn()){
         divToShow = logInDiv;
     }
+    if(divToShow === leaderBoardPage){
+        requestLeaderBoard();
+    }
     listOfDivs.forEach(
         (div) => {
             if(div!==divToShow){
@@ -141,7 +144,7 @@ function addPlayerCardBaccarat(num){
 }
 
 function addCrapsRoll(num){
-    crapsRolls.innerHTML += num;
+    crapsRolls.innerHTML += num + " ";
 }
 
 function updateBalance(newBalance){ //this will update all the balances on client side
@@ -149,10 +152,6 @@ function updateBalance(newBalance){ //this will update all the balances on clien
     for(let item of balanceLabels){
         item.innerText = "Current Balance: $" + newBalance;
     }
-}
-
-function addBalance(delta){ //this is used to change the balance
-    updateBalance(balance + delta);
 }
 
 function getBalance(){
@@ -182,7 +181,6 @@ function rouletteStraightBet(guess, betSize){
     if(betSize == ''|| !checkLogIn()){
         return;
     }
-    addBalance(-1 * betSize);
     socketio.emit("rouletteStraightBet", {"username": sessionStorage.getItem("username"), "betSize": betSize, "numGuess": guess});
 }
 
@@ -193,7 +191,6 @@ function rouletteColorBet(redBool, blackBool, betSize){
     if(betSize == ''|| !checkLogIn()){
         return;
     }
-    addBalance(-1 * betSize);
     socketio.emit("rouletteColorBet", {"username": sessionStorage.getItem("username"), "betSize": betSize, "redBool": redBool, "blackBool": blackBool});
 }
 
@@ -204,7 +201,6 @@ function rouletteEvenOddBet(oddBool, evenBool, betSize){
     if(betSize == ''|| !checkLogIn()){
         return;
     }
-    addBalance(-1 * betSize);
     socketio.emit("rouletteEvenOddBet", {"username": sessionStorage.getItem("username"), "betSize": betSize, "oddBool": oddBool, "evenBool": evenBool});
 }
 
@@ -215,7 +211,6 @@ function baccaratWinBet(betSize){
     if(betSize == '' || !checkLogIn()){
         return;
     }
-    addBalance(-1 * betSize);
     socketio.emit("baccaratWinBet", {"username": sessionStorage.getItem("username"), "betSize": betSize})
 }
 
@@ -226,7 +221,6 @@ function baccaratTieBet(betSize){
     if(betSize == ''|| !checkLogIn()){
         return;
     }
-    addBalance(-1 * betSize);
     socketio.emit("baccaratTieBet", {"username": sessionStorage.getItem("username"), "betSize": betSize})
 }
 
@@ -237,7 +231,6 @@ function crapsBet(betSize){
     if(betSize == '' || !checkLogIn()){
         return;
     }
-    addBalance(-1 * betSize);
     socketio.emit("crapsBet", {"username": sessionStorage.getItem("username"), "betSize": betSize});
 }
 
@@ -248,7 +241,6 @@ function requestDailyReward(){
     if(!checkLogIn()){
         return;
     }
-    //addBalance(1000)
     socketio.emit("requestDaily", {"username": sessionStorage.getItem("username")});
 }
 
@@ -283,7 +275,7 @@ socketio.on("balanceUpdated", function(data){
     updateBalance(data["balance"]);
 });
 
-socketio.on("roulletteResolved", function(data){
+socketio.on("rouletteResolved", function(data){
     rouletteResult.innerHTML = "It was a " + data["result"];
 });
 
