@@ -211,6 +211,7 @@ function baccaratWinBet(betSize){
     if(betSize == '' || !checkLogIn()){
         return;
     }
+    clearBaccarat();
     socketio.emit("baccaratWinBet", {"username": sessionStorage.getItem("username"), "betSize": betSize})
 }
 
@@ -221,6 +222,7 @@ function baccaratTieBet(betSize){
     if(betSize == ''|| !checkLogIn()){
         return;
     }
+    clearBaccarat();
     socketio.emit("baccaratTieBet", {"username": sessionStorage.getItem("username"), "betSize": betSize})
 }
 
@@ -231,6 +233,7 @@ function crapsBet(betSize){
     if(betSize == '' || !checkLogIn()){
         return;
     }
+    crapsRolls.innerHTML = "Rolls: ";
     socketio.emit("crapsBet", {"username": sessionStorage.getItem("username"), "betSize": betSize});
 }
 

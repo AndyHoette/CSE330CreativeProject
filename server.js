@@ -169,7 +169,7 @@ function findBlackJackWinner(playerTotal, dealerTotal){
 }
 function playBaccarat(socket){
     cardNumbersTaken = [];
-    let score = NaN;
+    let score;
     let playerTotal = 0;
     let dealerTotal = 0;
     let currCard = drawCard(); //after every draw card we send a message to the client to update their gui
@@ -426,7 +426,7 @@ io.sockets.on('connection', function(socket){
     });
     socket.on("requestDaily", function(data){
         getDaily(data["username"]);
-        setTimeout(getBalance(data["username"], socket), 500);
+        setTimeout(() => getBalance(data["username"], socket), 500);
         //these time out are race conditions :( but should work 99% of the time
         //most methods need us updating the user after they happen
     });
