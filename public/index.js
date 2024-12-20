@@ -95,7 +95,7 @@ function createAccount(newUsername, newPassword){
     if(debug){
         console.log("creating account: " + newUsername + ", " + newPassword);
     }
-    socketio.emit("createAccount", {"username": newUsername, "newPassword": newPassword});
+    socketio.emit("createAccount", {"username": newUsername, "password": newPassword});
 }
 
 function numToString(num){ //this converts a number to a card
@@ -271,6 +271,7 @@ socketio.on("loginResolved", function(data){
         return;
     }
     sessionStorage.setItem("username", data["username"]);
+    getBalance();
     showDiv(mainPageDiv);
 });
 
